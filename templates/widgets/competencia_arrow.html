@@ -1,116 +1,126 @@
 {% load static %}
 
 <style>
-    /* Grade de meses: 3 colunas iguais */
-    .month-grid {
-        display: grid;
+    /* Estilo do Wrapper para isolar o CSS */
+    #wrapper_{{ widget.attrs.id }} .month-grid,
+    #wrapper_{{ widget.attrs.id }} .year-grid {
+        display: grid; 
+        gap: 8px;
+    }
+    
+    /* Grade de Meses: 3 colunas */
+    #wrapper_{{ widget.attrs.id }} .month-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px; /* Espaço entre botões */
     }
 
-    /* Botões dos meses */
-    .month-btn {
-        width: 100%;
-        height: 40px;
-        font-weight: 500;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* Grade de Anos: 4 colunas (igual a imagem de referência) */
+    #wrapper_{{ widget.attrs.id }} .year-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 
-    .month-btn:hover {
+    /* Botões Gerais */
+    #wrapper_{{ widget.attrs.id }} .grid-btn {
+        width: 100%; height: 40px; font-size: 0.9rem; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 4px;
+    }
+    
+    /* Ano Selecionado / Hover */
+    #wrapper_{{ widget.attrs.id }} .grid-btn:hover {
         background-color: #e9ecef;
-        transform: scale(1.05); /* Pequeno zoom ao passar o mouse */
+    }
+    #wrapper_{{ widget.attrs.id }} .grid-btn.active {
+        background-color: #0d6efd; color: white; border-color: #0d6efd;
     }
 
-    /* O 13º Salário */
-    .btn-13 {
-        height: 40px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Área do Ano (Centralização Perfeita) */
-    .year-navigator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px; /* Espaço entre setas e número */
-        margin-bottom: 15px;
-    }
-
-    .year-display {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #0d6efd;
-        width: 80px; /* Largura fixa para não "pular" quando mudar o número */
+    /* Caixa do Ano (Topo) - Estilo "Input Clicável" */
+    #wrapper_{{ widget.attrs.id }} .year-trigger-box {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 6px 10px;
         text-align: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        background-color: #fff;
+        transition: border-color 0.2s;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    #wrapper_{{ widget.attrs.id }} .year-trigger-box:hover {
+        border-color: #86b7fe;
+        background-color: #f8f9fa;
     }
 
-    .btn-arrow {
-        border-radius: 50%; /* Botão redondo */
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
+    /* Navegação da View de Anos (< 2018-2029 >) */
+    #wrapper_{{ widget.attrs.id }} .year-nav-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 10px; font-weight: bold;
     }
+    #wrapper_{{ widget.attrs.id }} .nav-arrow {
+        border: none; background: transparent; color: #0d6efd; font-weight: bold;
+        width: 30px; height: 30px; border-radius: 50%;
+    }
+    #wrapper_{{ widget.attrs.id }} .nav-arrow:hover { background-color: #e9ecef; }
 </style>
 
-<div class="input-group">
-    {% for subwidget in widget.subwidgets %}
-        {% include subwidget.template_name with widget=subwidget %}
-    {% endfor %}
+<div id="wrapper_{{ widget.attrs.id }}">
+    
+    <div class="input-group">
+        {% for subwidget in widget.subwidgets %}
+            {% include subwidget.template_name with widget=subwidget %}
+        {% endfor %}
+        
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_{{ widget.attrs.id }}">
+            📅
+        </button>
+    </div>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompetencia_{{ widget.attrs.id }}">
-        📅
-    </button>
-</div>
-
-<div class="modal fade" id="modalCompetencia_{{ widget.attrs.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content shadow">
-            
-            <div class="modal-header bg-primary text-white py-2">
-                <h6 class="modal-title mx-auto">Selecionar Competência</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <div class="modal-body p-3">
+    <div class="modal fade" id="modal_{{ widget.attrs.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
                 
-                <div class="year-navigator">
-                    <button type="button" class="btn btn-outline-primary btn-arrow" id="btnPrev_{{ widget.attrs.id }}">
-                        &lt; </button>
-                    
-                    <span class="year-display" id="displayAno_{{ widget.attrs.id }}">2025</span>
-                    
-                    <button type="button" class="btn btn-outline-primary btn-arrow" id="btnNext_{{ widget.attrs.id }}">
-                        &gt; </button>
+                <div class="modal-header bg-primary text-white py-2">
+                    <h6 class="modal-title mx-auto">Selecionar Período</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                
+                <div class="modal-body p-3">
+                    
+                    <div id="view_header_{{ widget.attrs.id }}" class="mb-3">
+                        <label class="small text-muted mb-1">Ano de Referência:</label>
+                        <div class="year-trigger-box" id="btn_toggle_view_{{ widget.attrs.id }}">
+                            <span id="display_year_{{ widget.attrs.id }}">2025</span>
+                            <small>▼</small>
+                        </div>
+                    </div>
 
-                <div class="month-grid">
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="1">JAN</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="2">FEV</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="3">MAR</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="4">ABR</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="5">MAI</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="6">JUN</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="7">JUL</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="8">AGO</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="9">SET</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="10">OUT</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="11">NOV</button>
-                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="12">DEZ</button>
-                </div>
+                    <div id="view_months_{{ widget.attrs.id }}">
+                        <div class="month-grid">
+                            {% for i in "123456789012"|make_list %}
+                                <button type="button" class="btn btn-outline-secondary grid-btn month-btn" data-value="{{ forloop.counter }}">
+                                    {% if forloop.counter == 1 %}JAN{% elif forloop.counter == 2 %}FEV{% elif forloop.counter == 3 %}MAR{% elif forloop.counter == 4 %}ABR{% elif forloop.counter == 5 %}MAI{% elif forloop.counter == 6 %}JUN{% elif forloop.counter == 7 %}JUL{% elif forloop.counter == 8 %}AGO{% elif forloop.counter == 9 %}SET{% elif forloop.counter == 10 %}OUT{% elif forloop.counter == 11 %}NOV{% elif forloop.counter == 12 %}DEZ{% endif %}
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-warning w-100 grid-btn fw-bold month-btn" data-value="13">
+                                🌟 13º Salário
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="mt-2">
-                    <button type="button" class="btn btn-warning w-100 btn-13 shadow-sm" data-value="13">
-                        13º Salário
-                    </button>
+                    <div id="view_years_{{ widget.attrs.id }}" class="d-none">
+                        
+                        <div class="year-nav-header">
+                            <button type="button" class="nav-arrow" id="prev_decade_{{ widget.attrs.id }}">&lt;</button>
+                            <span id="decade_label_{{ widget.attrs.id }}">2019 - 2030</span>
+                            <button type="button" class="nav-arrow" id="next_decade_{{ widget.attrs.id }}">&gt;</button>
+                        </div>
+
+                        <div class="year-grid" id="year_grid_container_{{ widget.attrs.id }}">
+                            </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -120,54 +130,121 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const widgetId = "{{ widget.attrs.id }}";
-        const modalId = "#modalCompetencia_" + widgetId;
-        const modalElement = document.querySelector(modalId);
         
-        if (modalElement) {
-            const displayAno = document.getElementById("displayAno_" + widgetId);
-            const btnPrev = document.getElementById("btnPrev_" + widgetId);
-            const btnNext = document.getElementById("btnNext_" + widgetId);
-            const monthButtons = modalElement.querySelectorAll(".month-btn, .btn-13");
+        // Elementos Principais
+        const modalEl = document.getElementById("modal_" + widgetId);
+        const btnToggleView = document.getElementById("btn_toggle_view_" + widgetId);
+        const displayYear = document.getElementById("display_year_" + widgetId);
+        const viewHeader = document.getElementById("view_header_" + widgetId);
+        
+        // Views (Containers)
+        const viewMonths = document.getElementById("view_months_" + widgetId);
+        const viewYears = document.getElementById("view_years_" + widgetId);
+        
+        // Elementos da View de Anos
+        const decadeLabel = document.getElementById("decade_label_" + widgetId);
+        const yearGridContainer = document.getElementById("year_grid_container_" + widgetId);
+        const btnPrevDecade = document.getElementById("prev_decade_" + widgetId);
+        const btnNextDecade = document.getElementById("next_decade_" + widgetId);
+
+        // Inputs Reais do Django
+        const realMesInput = document.getElementById(widgetId + "_0");
+        const realAnoInput = document.getElementById(widgetId + "_1");
+
+        // Estado Local
+        let currentYear = new Date().getFullYear(); // Ano selecionado
+        let gridStartYear = currentYear - 5; // Ano de início da grade de navegação
+
+        // --- FUNÇÕES AUXILIARES ---
+
+        function showMonthsView() {
+            viewMonths.classList.remove("d-none");
+            viewYears.classList.add("d-none");
+            viewHeader.classList.remove("d-none"); // Mostra o cabeçalho do ano
+            displayYear.textContent = currentYear;
             
-            const realMesInput = document.getElementById(widgetId + "_0");
-            const realAnoInput = document.getElementById(widgetId + "_1");
-
-            let currentYear = new Date().getFullYear();
-
-            function updateYearDisplay() {
-                displayAno.textContent = currentYear;
-            }
-
-            btnPrev.addEventListener("click", function() {
-                currentYear--;
-                updateYearDisplay();
-            });
-
-            btnNext.addEventListener("click", function() {
-                currentYear++;
-                updateYearDisplay();
-            });
-
-            monthButtons.forEach(btn => {
-                btn.addEventListener("click", function() {
-                    const mesSelecionado = this.getAttribute("data-value");
-                    
-                    if(realMesInput) realMesInput.value = mesSelecionado;
-                    if(realAnoInput) realAnoInput.value = currentYear;
-
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    modalInstance.hide();
-                });
-            });
-
-            modalElement.addEventListener('show.bs.modal', function () {
-                if(realAnoInput && realAnoInput.value) {
-                    currentYear = parseInt(realAnoInput.value);
-                } else {
-                    currentYear = new Date().getFullYear();
-                }
-                updateYearDisplay();
-            });
+            // Atualiza input real do ano ao voltar pra cá
+            if(realAnoInput) realAnoInput.value = currentYear;
         }
+
+        function showYearsView() {
+            viewMonths.classList.add("d-none");
+            viewYears.classList.remove("d-none");
+            viewHeader.classList.add("d-none"); // Esconde o cabeçalho simples para focar na grade
+            
+            // Centraliza a grade no ano atual
+            gridStartYear = currentYear - 5; 
+            renderYearGrid();
+        }
+
+        function renderYearGrid() {
+            yearGridContainer.innerHTML = ""; // Limpa grade
+            const gridEndYear = gridStartYear + 11; // Mostra 12 anos
+            decadeLabel.textContent = `${gridStartYear} - ${gridEndYear}`;
+
+            for (let y = gridStartYear; y <= gridEndYear; y++) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "btn btn-outline-secondary grid-btn year-select-btn";
+                btn.textContent = y;
+                
+                if (y === currentYear) {
+                    btn.classList.add("active"); // Destaca o ano atual
+                }
+
+                // Ao clicar num ano da grade
+                btn.addEventListener("click", function() {
+                    currentYear = y;
+                    showMonthsView(); // Volta para selecionar o mês
+                });
+
+                yearGridContainer.appendChild(btn);
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // 1. Clicar na caixa do ano (2025) -> Abre seletor de anos
+        btnToggleView.addEventListener("click", showYearsView);
+
+        // 2. Navegação da Década (< >)
+        btnPrevDecade.addEventListener("click", function() {
+            gridStartYear -= 12;
+            renderYearGrid();
+        });
+
+        btnNextDecade.addEventListener("click", function() {
+            gridStartYear += 12;
+            renderYearGrid();
+        });
+
+        // 3. Seleção de Mês (Finaliza o processo)
+        const monthButtons = modalEl.querySelectorAll(".month-btn");
+        monthButtons.forEach(btn => {
+            btn.addEventListener("click", function() {
+                const mes = this.getAttribute("data-value");
+                
+                // Salva nos inputs reais
+                if(realMesInput) realMesInput.value = mes;
+                if(realAnoInput) realAnoInput.value = currentYear;
+
+                // Fecha modal
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                modalInstance.hide();
+            });
+        });
+
+        // 4. Ao abrir o modal, sincroniza estados
+        modalEl.addEventListener('show.bs.modal', function () {
+            // Pega o valor que já está no input (se houver)
+            if(realAnoInput && realAnoInput.value) {
+                currentYear = parseInt(realAnoInput.value);
+            } else {
+                currentYear = new Date().getFullYear();
+            }
+            
+            // Começa sempre na visão de meses
+            showMonthsView();
+        });
     });
 </script>
