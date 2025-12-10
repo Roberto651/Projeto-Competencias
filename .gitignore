@@ -1,0 +1,22 @@
+# .gitignore para Django
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente Virtual (ajuste o nome se o seu for diferente)
+venv/
+env/
+.env
+
+# Banco de dados (geralmente não queremos o SQLite no git)
+db.sqlite3
+db.sqlite3-journal
+
+# Arquivos de mídia (uploads de usuários)
+media/
+
+# IDEs
+.vscode/
+.idea/

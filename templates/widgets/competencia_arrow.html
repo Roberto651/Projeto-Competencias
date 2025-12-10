@@ -1,0 +1,173 @@
+{% load static %}
+
+<style>
+    /* Grade de meses: 3 colunas iguais */
+    .month-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px; /* Espaço entre botões */
+    }
+
+    /* Botões dos meses */
+    .month-btn {
+        width: 100%;
+        height: 40px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .month-btn:hover {
+        background-color: #e9ecef;
+        transform: scale(1.05); /* Pequeno zoom ao passar o mouse */
+    }
+
+    /* O 13º Salário */
+    .btn-13 {
+        height: 40px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Área do Ano (Centralização Perfeita) */
+    .year-navigator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px; /* Espaço entre setas e número */
+        margin-bottom: 15px;
+    }
+
+    .year-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0d6efd;
+        width: 80px; /* Largura fixa para não "pular" quando mudar o número */
+        text-align: center;
+    }
+
+    .btn-arrow {
+        border-radius: 50%; /* Botão redondo */
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+</style>
+
+<div class="input-group">
+    {% for subwidget in widget.subwidgets %}
+        {% include subwidget.template_name with widget=subwidget %}
+    {% endfor %}
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCompetencia_{{ widget.attrs.id }}">
+        📅
+    </button>
+</div>
+
+<div class="modal fade" id="modalCompetencia_{{ widget.attrs.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow">
+            
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title mx-auto">Selecionar Competência</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                
+                <div class="year-navigator">
+                    <button type="button" class="btn btn-outline-primary btn-arrow" id="btnPrev_{{ widget.attrs.id }}">
+                        &lt; </button>
+                    
+                    <span class="year-display" id="displayAno_{{ widget.attrs.id }}">2025</span>
+                    
+                    <button type="button" class="btn btn-outline-primary btn-arrow" id="btnNext_{{ widget.attrs.id }}">
+                        &gt; </button>
+                </div>
+
+                <div class="month-grid">
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="1">JAN</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="2">FEV</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="3">MAR</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="4">ABR</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="5">MAI</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="6">JUN</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="7">JUL</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="8">AGO</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="9">SET</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="10">OUT</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="11">NOV</button>
+                    <button type="button" class="btn btn-outline-secondary month-btn" data-value="12">DEZ</button>
+                </div>
+
+                <div class="mt-2">
+                    <button type="button" class="btn btn-warning w-100 btn-13 shadow-sm" data-value="13">
+                        13º Salário
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const widgetId = "{{ widget.attrs.id }}";
+        const modalId = "#modalCompetencia_" + widgetId;
+        const modalElement = document.querySelector(modalId);
+        
+        if (modalElement) {
+            const displayAno = document.getElementById("displayAno_" + widgetId);
+            const btnPrev = document.getElementById("btnPrev_" + widgetId);
+            const btnNext = document.getElementById("btnNext_" + widgetId);
+            const monthButtons = modalElement.querySelectorAll(".month-btn, .btn-13");
+            
+            const realMesInput = document.getElementById(widgetId + "_0");
+            const realAnoInput = document.getElementById(widgetId + "_1");
+
+            let currentYear = new Date().getFullYear();
+
+            function updateYearDisplay() {
+                displayAno.textContent = currentYear;
+            }
+
+            btnPrev.addEventListener("click", function() {
+                currentYear--;
+                updateYearDisplay();
+            });
+
+            btnNext.addEventListener("click", function() {
+                currentYear++;
+                updateYearDisplay();
+            });
+
+            monthButtons.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const mesSelecionado = this.getAttribute("data-value");
+                    
+                    if(realMesInput) realMesInput.value = mesSelecionado;
+                    if(realAnoInput) realAnoInput.value = currentYear;
+
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    modalInstance.hide();
+                });
+            });
+
+            modalElement.addEventListener('show.bs.modal', function () {
+                if(realAnoInput && realAnoInput.value) {
+                    currentYear = parseInt(realAnoInput.value);
+                } else {
+                    currentYear = new Date().getFullYear();
+                }
+                updateYearDisplay();
+            });
+        }
+    });
+</script>

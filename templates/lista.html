@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2>Lançamentos Registrados</h2>
+    <a href="{% url 'criar_lancamento' %}" class="btn btn-success mb-3">Novo Lançamento</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Competência (Formatada)</th>
+                <th>Competência (Banco Raw)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in lancamentos %}
+            <tr>
+                <td>{{ item.descricao }}</td>
+                <td>R$ {{ item.valor }}</td>
+                <td>
+                    {% widthratio item.competencia 100 1 %} / 
+                    {{ item.competencia|stringformat:"i"|slice:"-2:" }}
+                </td>
+                <td>{{ item.competencia }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
