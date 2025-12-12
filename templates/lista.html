@@ -15,6 +15,7 @@
                 <th>Valor</th>
                 <th>Competência (Formatada)</th>
                 <th>Competência (Banco Raw)</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -27,6 +28,11 @@
                     {{ item.competencia|stringformat:"i"|slice:"-2:" }}
                 </td>
                 <td>{{ item.competencia }}</td>
+                <td>
+                    <a href="{% url 'editar_lancamento' item.pk %}" class="btn btn-sm btn-primary">
+                        ✏️
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

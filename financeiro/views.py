@@ -6,7 +6,6 @@ from .forms import LancamentoForm
 class CriarLancamentoView(CreateView):
     model = Lancamento
     form_class = LancamentoForm
-    #fields = ["valor", "descricao", "competencia"]
     template_name = 'form.html'
     success_url = reverse_lazy('lista_lancamentos') # Redireciona após salvar
 
@@ -15,17 +14,20 @@ class CriarLancamentoView(CreateView):
         context['titulo'] = "Novo Lançamento Financeiro"
         return context
     
-
-class LancamentoEditView(UpdateView):
-    model = Lancamento
-    form_class = LancamentoForm
-    template_name = 'form.html'
-    success_url = reverse_lazy('lista_lancamentos') #
-
-
-
 class ListaLancamentosView(ListView):
     model = Lancamento
     template_name = 'lista.html'
     context_object_name = 'lancamentos'
     ordering = ['-competencia']
+
+class LancamentoEditView(UpdateView):
+    model = Lancamento
+    form_class = LancamentoForm
+    template_name = 'form.html' # Reutilizamos o mesmo template de criação
+    success_url = reverse_lazy('lista_lancamentos')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Mudamos o título para o usuário saber que está editando
+        context['titulo'] = "Editar Lançamento"
+        return context
