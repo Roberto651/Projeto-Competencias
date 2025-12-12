@@ -78,8 +78,8 @@ class CompetenciaField(forms.MultiValueField):
     def __init__(self, **kwargs):
         # Define os validadores para Mês (1-13) e Ano (1900-2100)
         fields = (
-            forms.IntegerField(min_value=1, max_value=13),
-            forms.IntegerField(min_value=1900, max_value=2100),
+            forms.IntegerField(),
+            forms.IntegerField(),
         )
         
         # Adiciona um texto de ajuda padrão se não for informado

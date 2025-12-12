@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path
-# AQUI ESTÁ A CORREÇÃO:
 from financeiro.views import CriarLancamentoView, ListaLancamentosView, LancamentoEditView
 
 urlpatterns = [
