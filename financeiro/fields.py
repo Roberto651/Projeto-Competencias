@@ -2,6 +2,7 @@
 import datetime
 from django import forms
 from django.core.exceptions import ValidationError
+from .validators import validar_ano_inicio, validar_ano_limite_futuro, validar_mes_range
 
 # --- 1. Definição das Opções (Choices) ---
 MESES_CHOICES = [
@@ -67,38 +68,51 @@ class CompetenciaWidget(forms.MultiWidget):
         return context
 
 
-# --- 3. O Field (Lógica de Validação e Processamento) ---
+# --- O Field (Atualizado com Validators) ---
 class CompetenciaField(forms.MultiValueField):
-    """
-    Campo reutilizável que gerencia a validação e conversão 
-    de AAAAMM <-> [Mês, Ano].
-    """
     widget = CompetenciaWidget
 
     def __init__(self, **kwargs):
-        # Define os validadores para Mês (1-13) e Ano (1900-2100)
         fields = (
-            forms.IntegerField(),
-            forms.IntegerField(),
+            forms.IntegerField(min_value=1, max_value=13),
+            forms.IntegerField(min_value=1900, max_value=2100),
         )
         
-        # Adiciona um texto de ajuda padrão se não for informado
         if 'help_text' not in kwargs:
             kwargs['help_text'] = "Selecione o mês e o ano."
-            
+        
+        # --- A MÁGICA DOS VALIDATORS ACONTECE AQUI ---
+        # Pegamos os validadores que o usuário passou (se houver) e adicionamos os nossos padrões
+        validators_padrao = [validar_ano_inicio, validar_ano_limite_futuro, validar_mes_range]
+        
+        if 'validators' in kwargs:
+            kwargs['validators'] += validators_padrao
+        else:
+            kwargs['validators'] = validators_padrao
+
         super().__init__(fields, **kwargs)
 
     def compress(self, data_list):
         """
-        Junta a lista [Mês, Ano] vinda do formulário 
-        em um único inteiro AAAAMM para salvar no banco.
+        Agora o compress faz APENAS o trabalho dele: 
+        Juntar as peças (Mês + Ano) em um inteiro.
+        A validação de negócio acontecerá DEPOIS, automaticamente pelo Django.
         """
-        if data_list:
-            mes, ano = data_list
-            if mes in [None, ''] or ano in [None, '']:
-                return None
-            
-            # Lógica matemática: (Ano * 100) + Mês
-            # Ex: (2025 * 100) + 13 = 202500 + 13 = 202513
-            return (int(ano) * 100) + int(mes)
-        return None
+        if not data_list:
+            return None
+
+        mes, ano = data_list
+        
+        if mes in [None, ''] or ano in [None, '']:
+            return None
+
+        # Apenas garante conversão de tipo
+        try:
+            mes = int(mes)
+            ano = int(ano)
+        except ValueError:
+            raise ValidationError("Mês e Ano devem ser numéricos.")
+
+        # Retorna o inteiro puro. 
+        # O Django vai pegar esse inteiro e passar para a lista de 'validators' definida no __init__
+        return (ano * 100) + mes
