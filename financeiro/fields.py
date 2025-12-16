@@ -47,10 +47,15 @@ class CompetenciaWidget(forms.MultiWidget):
         em uma lista para os widgets [13, 2025].
         """
         if value:
+            # CORREÇÃO: Primeiro verificamos se é o nosso Objeto Rico
+            # Se o valor tiver as propriedades .mes e .ano, usamos elas direto!
+            if hasattr(value, 'mes') and hasattr(value, 'ano'):
+                return [value.mes, value.ano]
+            
+            # Fallback: Se for um número inteiro puro (ex: vindo de uma API ou teste)
             try:
-                value = int(value)
-                # Separa Mês e Ano
-                return [value % 100, value // 100]
+                value_int = int(value)
+                return [value_int % 100, value_int // 100]
             except (ValueError, TypeError):
                 return [None, None]
         
@@ -93,11 +98,6 @@ class CompetenciaField(forms.MultiValueField):
         super().__init__(fields, **kwargs)
 
     def compress(self, data_list):
-        """
-        Agora o compress faz APENAS o trabalho dele: 
-        Juntar as peças (Mês + Ano) em um inteiro.
-        A validação de negócio acontecerá DEPOIS, automaticamente pelo Django.
-        """
         if not data_list:
             return None
 
@@ -106,21 +106,16 @@ class CompetenciaField(forms.MultiValueField):
         if mes in [None, ''] or ano in [None, '']:
             return None
 
-        # Apenas garante conversão de tipo
         try:
             mes = int(mes)
             ano = int(ano)
         except ValueError:
             raise ValidationError("Mês e Ano devem ser numéricos.")
 
-        # Retorna o inteiro puro. 
-        # O Django vai pegar esse inteiro e passar para a lista de 'validators' definida no __init__
-        valor_inteiro = (ano * 100) + mes
+        # Importação Local
+        from .models import Competencia
         
-        # --- AQUI MUDA ---
-        # Em vez de retornar o int puro, retornamos o Objeto
-        
-        # Importação Local para evitar erro circular
-        from .models import Competencia 
-        
-        return Competencia(valor_inteiro)
+        # AQUI ESTÁ A MUDANÇA:
+        # Agora podemos instanciar passando (ano, mes) direto!
+        # Muito mais limpo que fazer a conta (ano * 100 + mes) manualmente.
+        return Competencia(ano, mes)
