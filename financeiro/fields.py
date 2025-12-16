@@ -115,4 +115,12 @@ class CompetenciaField(forms.MultiValueField):
 
         # Retorna o inteiro puro. 
         # O Django vai pegar esse inteiro e passar para a lista de 'validators' definida no __init__
-        return (ano * 100) + mes
+        valor_inteiro = (ano * 100) + mes
+        
+        # --- AQUI MUDA ---
+        # Em vez de retornar o int puro, retornamos o Objeto
+        
+        # Importação Local para evitar erro circular
+        from .models import Competencia 
+        
+        return Competencia(valor_inteiro)
