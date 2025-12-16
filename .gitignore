@@ -1,22 +1,72 @@
-# .gitignore para Django
-
-# Python
+# ------------------------------------------------
+# PYTHON & AMBIENTE
+# ------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
+*.dll
+*.so
+*.pyd
 
-# Ambiente Virtual (ajuste o nome se o seu for diferente)
+# Ambientes Virtuais (Várias convenções de nome)
 venv/
+.venv/
 env/
 .env
 
-# Banco de dados (geralmente não queremos o SQLite no git)
+# Distribuição / Instalação
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ------------------------------------------------
+# DJANGO
+# ------------------------------------------------
+# Banco de dados local
 db.sqlite3
 db.sqlite3-journal
 
-# Arquivos de mídia (uploads de usuários)
+# Arquivos de log
+*.log
+
+# Configurações locais (caso você crie um para senhas locais futuramente)
+local_settings.py
+
+# Pasta de mídia (Uploads de usuários - não versionar)
 media/
 
-# IDEs
+# Pasta de estáticos coletados (o collectstatic gera isso, não versionar)
+# Nota: A pasta 'static' onde você cria seus CSS/JS DEVE ser versionada.
+# Apenas a pasta de destino final (geralmente staticfiles) que é ignorada.
+staticfiles/
+
+# ------------------------------------------------
+# TESTES & QUALIDADE DE CÓDIGO
+# ------------------------------------------------
+# Cache do Pytest (Importante pois acabamos de instalar)
+.pytest_cache/
+
+# Coverage (Relatórios de cobertura de testes)
+.coverage
+htmlcov/
+coverage.xml
+
+# ------------------------------------------------
+# IDEs & EDITORES
+# ------------------------------------------------
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# ------------------------------------------------
+# SISTEMA OPERACIONAL (Lixo de SO)
+# ------------------------------------------------
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
